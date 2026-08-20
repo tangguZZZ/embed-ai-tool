@@ -79,7 +79,7 @@ metadata:
 | 选项 | 说明 |
 |------|------|
 | **A. 推荐集** | 基于工程分析得出的最小集（通常 5-8 个），可在此基础上增删 |
-| **B. 全部安装** | 安装全部 22 个 skill，适合全局工具人 / 教学场景 |
+| **B. 全部安装** | 安装全部 24 个 skill，适合全局工具人 / 教学场景 |
 | **C. 按分类逐一勾选** | 按 6 个分类顺序逐一询问，每类下用户可全选、跳过或勾选部分（详见"分类逐一勾选流程"） |
 | **D. 自定义** | 用户直接输入 skill 名或编号，自由组合 |
 
@@ -96,7 +96,7 @@ metadata:
 | 1 | 构建 | build-cmake / build-keil / build-iar / build-platformio / build-idf / build-makefile（6） | 勾选识别到的构建系统对应项，其余不勾 |
 | 2 | 烧录 | flash-keil / flash-openocd / flash-platformio / flash-idf / flash-jlink（5） | 勾选识别到的探针 / 工具链对应项 |
 | 3 | 调试 | debug-gdb-openocd / debug-jlink / debug-platformio / rtos-debug（4） | 勾选识别到的调试器对应项；检测到 RTOS 时勾 `rtos-debug` |
-| 4 | 通信 | serial-monitor / modbus-debug / can-debug / visa-debug（4） | 默认勾 `serial-monitor`；按协议线索勾 `modbus` / `can` / `visa` |
+| 4 | 通信 | serial-monitor / serial-shell / modbus-debug / can-debug / visa-debug / logic-analyzer（6） | 默认勾 `serial-monitor`；按协议线索勾 `modbus` / `can` / `visa` / `logic-analyzer` |
 | 5 | 分析 | memory-analysis / static-analysis（2） | 工程能产 `.map` / `.elf` 时勾 `memory-analysis` |
 | 6 | 编排 | workflow（1） | 默认勾选 |
 
@@ -140,7 +140,7 @@ metadata:
    可选安装方案：
 
    A. 推荐集（6 个）— build-cmake / flash-openocd / debug-gdb-openocd / serial-monitor / memory-analysis / workflow
-   B. 全部安装（22 个）
+   B. 全部安装（24 个）
    C. 按分类逐一勾选（6 个分类顺序询问）
    D. 自定义（输入 skill 名或编号）
 
@@ -174,9 +174,11 @@ metadata:
 | 调试 | `debug-platformio` | 通过 PlatformIO 内置 GDB 调试 |
 | 调试 | `rtos-debug` | FreeRTOS/RT-Thread/Zephyr 线程感知调试 |
 | 通信 | `serial-monitor` | 串口选择与运行日志抓取 |
+| 通信 | `serial-shell` | 串口交互式 Shell 会话与批量脚本执行 |
 | 通信 | `modbus-debug` | Modbus RTU/TCP 寄存器读写与从站扫描 |
 | 通信 | `can-debug` | CAN 总线帧监听、发送和节点扫描 |
 | 通信 | `visa-debug` | VISA 仪器 SCPI 通信、波形捕获和截图 |
+| 通信 | `logic-analyzer` | Saleae 逻辑分析仪波形采集与 I2C/SPI/UART/CAN 解码 |
 | 分析 | `memory-analysis` | .map/ELF 内存使用报告与符号排名 |
 | 分析 | `static-analysis` | cppcheck/clang-tidy 静态分析，MISRA-C 合规 |
 | 编排 | `workflow` | 串联编译+烧录+监控/调试的流水线 |

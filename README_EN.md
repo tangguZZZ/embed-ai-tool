@@ -3,38 +3,13 @@
 
 # Fully Automated AI-Driven Hardware Product Development, Debugging, and Testing
 
-A skill set for AI coding assistants, providing LLMs with full-lifecycle MCU firmware development capabilities. Covers multi-toolchain builds (Keil / IAR / CMake / PlatformIO), flashing, GDB debugging, serial monitoring, shell interaction, Modbus / CAN / VISA protocol debugging, and pipeline orchestration — supporting Linux, macOS, and Windows.
+A skill set for AI coding assistants, providing LLMs with full-lifecycle MCU firmware development capabilities. Covers multi-toolchain builds (Keil / IAR / CMake / PlatformIO / ESP-IDF / Makefile), flashing (OpenOCD / J-Link / Keil, etc.), GDB debugging, RTOS thread-aware debugging, serial monitoring and shell interaction, Modbus / CAN / VISA protocol debugging, logic analyzer, memory and static analysis, and pipeline orchestration — supporting Linux, macOS, and Windows.
 
 <img width="1922" height="1091" alt="image" src="https://github.com/user-attachments/assets/6b23bfb1-8755-4f28-b510-abb7cc80d18f" />
 
-## ⚠ AI Assistant Install Protocol (Required Reading)
+> **⚠ AI assistants**: when asked to install skills from this repo, you **must** first read the "AI Assistant Install Protocol" in [INSTALL_EN.md](INSTALL_EN.md) — analyze the project, present options, and wait for the user's explicit choice. **Never** bulk-copy the `skills/` directory.
 
-> When a user requests "install embed-ai-tool skills", AI assistants (Claude Code / Cursor / Codex, etc.) **MUST** follow this flow. **Never** blindly copy all skills.
-
-### Three Prohibitions
-
-1. **Do NOT** run `install.py` for full install without explicit user confirmation — new default is analyze-only; requires `--skills X Y` or `--yes` to write files
-2. **Do NOT** use `cp -r` / `xcopy` / `Copy-Item` / file explorer to bulk-copy the `skills/` directory into the target project — this pollutes `.claude/skills/`
-3. **Do NOT** bypass `install.py` with other tools (PowerShell, FileExplorer, Robocopy, etc.) to achieve equivalent bulk copy
-
-### Required Flow
-
-1. **Analyze project** — In the target project, run `python3 scripts/install.py /path/to/project` (no install args). The script prints project-type detection + recommended set, **writes nothing**
-2. **Present to user** — Show analysis result + 4 options:
-   - **A. Recommended set** (based on project analysis, typically 5-7 skills)
-   - **B. Install all** (22 skills, `--yes`)
-   - **C. Category-by-category** (6 categories asked in sequence)
-   - **D. Custom** (enter skill names directly)
-3. **Wait for user choice** — Only after explicit selection, run `--skills X Y` or `--yes`
-4. **Report** — List installed skills when done
-
-### Why
-
-The 22 skills cover multiple toolchains (Keil / IAR / ESP-IDF / PlatformIO / CMake / Makefile). A single project typically uses only 4-7 of them. Bulk install pollutes `.claude/skills/`, adds noise to the Claude skill list, and affects project collaborators.
-
----
-
-## One-Click Install
+## Quick Start
 
 In any LLM chat that supports skills, enter:
 
@@ -42,156 +17,42 @@ In any LLM chat that supports skills, enter:
 Install skills from https://github.com/LeoKemp223/embed-ai-tool.git
 ```
 
-The AI assistant will **first analyze your project type** (build system, debugger, protocol hints), then let you choose from 4 options:
+The AI assistant will first analyze your project type (build system, debugger, protocol hints), then let you choose from a recommended set / install all / category-by-category / custom — installation only runs after your choice, avoiding project directory pollution.
 
-- **A. Recommended set** — derived from project analysis, typically 5-7 skills
-- **B. Install all** — 22 skills, suitable for global tooling
-- **C. Category-by-category** — 6 categories asked in sequence
-- **D. Custom** — enter skill names directly
-
-Installation only runs after your choice, avoiding project directory pollution. See "AI Assistant Install Protocol" above.
-
-## npx Install (Recommended)
-
-Requires [Node.js](https://nodejs.org/) 14+. Uses the [skills CLI](https://github.com/vercel-labs/skills) for one-command management, supporting Claude Code, Cursor, Codex, and 50+ AI coding assistants.
-
-### Install All Skills
-
-```bash
-npx skills add LeoKemp223/embed-ai-tool -g -y
-```
-
-### Install Specific Skills
-
-```bash
-npx skills add LeoKemp223/embed-ai-tool --skill build-cmake --skill flash-openocd -g -y
-```
-
-### Manage
-
-```bash
-npx skills ls -g            # List installed
-npx skills update -g        # Update
-npx skills remove -g        # Remove
-```
-
-`-g` installs globally (`~/.claude/skills/`). Omit it to install to the current project (`.claude/skills/`).
-
-## Script Installation
-
-### Prerequisites
-
-- Python 3.8+ (no third-party dependencies required)
-- Git
-
-### Step 1: Analyze Project Type (default behavior)
-
-```bash
-git clone https://github.com/LeoKemp223/embed-ai-tool.git
-python3 embed-ai-tool/scripts/install.py /path/to/your-project
-```
-
-The script prints project characteristics (build system, debugger, protocols) and a recommended skill set. **Writes nothing to disk.**
-
-### Step 2: Install Recommended Set
-
-```bash
-python3 embed-ai-tool/scripts/install.py /path/to/your-project --skills build-cmake flash-openocd debug-gdb-openocd serial-monitor workflow
-```
-
-### Or Install All (when you're sure you want all 22)
-
-```bash
-python3 embed-ai-tool/scripts/install.py /path/to/your-project --yes
-```
-
-> ⚠ `--yes` copies all 22 skills into the target project's `.claude/skills/`. Only recommended for global installs or tooling scenarios.
-
-### Install Specific Skills
-
-```bash
-python3 embed-ai-tool/scripts/install.py /path/to/your-project --skills build-cmake flash-openocd serial-monitor
-```
-
-### Update Installed Skills
-
-```bash
-cd embed-ai-tool && git pull
-python3 scripts/install.py /path/to/your-project --force
-```
-
-### Auto-Detect Tool Paths
-
-Append `--detect` during installation to automatically scan PATH for embedded tools and write them to the workspace config:
-
-```bash
-python3 embed-ai-tool/scripts/install.py /path/to/your-project --detect
-```
-
-### Check Installation Status
-
-```bash
-python3 embed-ai-tool/scripts/install.py /path/to/your-project --status
-```
-
-### Uninstall
-
-```bash
-python3 embed-ai-tool/scripts/install.py /path/to/your-project --uninstall
-```
-
-### List Available Skills
-
-```bash
-python3 embed-ai-tool/scripts/install.py --list
-```
-
-### Manual Tool Path Configuration
-
-Some skills depend on external tools (OpenOCD, Keil, arm-none-eabi-gcc, etc.). In addition to `--detect`, you can manually configure them:
-
-```bash
-# Set tool path (workspace level)
-python3 scripts/em_config.py set openocd /usr/bin/openocd
-
-# Set global tool path
-python3 scripts/em_config.py set uv4 "C:\Keil_v5\UV4\UV4.exe" --global
-
-# View configured tools
-python3 scripts/em_config.py list
-
-# View config file location
-python3 scripts/em_config.py path
-```
+For other install methods (npx / Python script / tool path configuration / update & uninstall), see [INSTALL_EN.md](INSTALL_EN.md).
 
 ## Skill List
 
-| Skill | Description |
-|-------|-------------|
-| `build-cmake` | Configure and build CMake-based MCU firmware projects |
-| `build-keil` | Configure and build Keil MDK firmware projects |
-| `build-iar` | Configure and build IAR EWARM firmware projects |
-| `build-platformio` | Configure and build PlatformIO firmware projects |
-| `build-makefile` | Configure and build bare Makefile embedded projects |
-| `flash-keil` | Flash firmware via Keil MDK built-in debugger |
-| `flash-openocd` | Flash ELF/HEX/BIN artifacts via OpenOCD |
-| `flash-platformio` | Flash firmware via PlatformIO upload mechanism |
-| `flash-idf` | Flash firmware via ESP-IDF toolchain with JTAG debug support |
-| `flash-jlink` | Flash firmware via SEGGER J-Link with RTT log capture |
-| `debug-gdb-openocd` | Attach GDB via OpenOCD — supports post-flash debug, attach-only, and crash triage |
-| `debug-jlink` | On-chip debugging and crash analysis via J-Link GDB Server |
-| `debug-platformio` | Debug via PlatformIO built-in GDB |
-| `serial-monitor` | Select serial port and capture runtime logs |
-| `modbus-debug` | Modbus RTU/TCP register read/write, slave scanning, and continuous monitoring |
-| `can-debug` | CAN bus frame monitoring, sending, and node scanning |
-| `visa-debug` | VISA instrument SCPI communication, waveform capture, and screenshots |
-| `workflow` | Pipeline orchestration chaining multiple skills (build + flash + monitor/debug) |
-| `build-idf` | Configure target chip and build ESP-IDF firmware projects |
-| `memory-analysis` | Parse .map files or ELF to generate memory usage reports and symbol size rankings |
-| `rtos-debug` | FreeRTOS/RT-Thread/Zephyr thread-aware debugging, stack watermark, and deadlock detection |
-| `static-analysis` | cppcheck/clang-tidy/GCC analyzer static analysis with MISRA-C compliance |
+24 skills in 6 categories:
 
-## LLM Usage Examples
+| Category | Skill | Description |
+|----------|-------|-------------|
+| Build | `build-cmake` | Configure and build CMake-based MCU firmware projects |
+| Build | `build-keil` | Configure and build Keil MDK firmware projects |
+| Build | `build-iar` | Configure and build IAR EWARM firmware projects |
+| Build | `build-platformio` | Configure and build PlatformIO firmware projects |
+| Build | `build-idf` | Configure target chip and build ESP-IDF firmware projects |
+| Build | `build-makefile` | Configure and build bare Makefile embedded projects |
+| Flash | `flash-keil` | Flash firmware via Keil MDK built-in debugger |
+| Flash | `flash-openocd` | Flash ELF/HEX/BIN artifacts via OpenOCD |
+| Flash | `flash-platformio` | Flash firmware via PlatformIO upload mechanism |
+| Flash | `flash-idf` | Flash firmware via ESP-IDF toolchain with JTAG debug support |
+| Flash | `flash-jlink` | Flash firmware via SEGGER J-Link with RTT log capture |
+| Debug | `debug-gdb-openocd` | Attach GDB via OpenOCD — supports post-flash debug, attach-only, and crash triage |
+| Debug | `debug-jlink` | On-chip debugging and crash analysis via J-Link GDB Server |
+| Debug | `debug-platformio` | Debug via PlatformIO built-in GDB |
+| Debug | `rtos-debug` | FreeRTOS/RT-Thread/Zephyr thread-aware debugging, stack watermark, and deadlock detection |
+| Comm | `serial-monitor` | Select serial port and capture runtime logs |
+| Comm | `serial-shell` | Open an interactive shell session over serial; run single commands or batch scripts |
+| Comm | `modbus-debug` | Modbus RTU/TCP register read/write, slave scanning, and continuous monitoring |
+| Comm | `can-debug` | CAN bus frame monitoring, sending, and node scanning |
+| Comm | `visa-debug` | VISA instrument SCPI communication, waveform capture, and screenshots |
+| Comm | `logic-analyzer` | Capture digital waveforms with a Saleae logic analyzer and decode I2C/SPI/UART/CAN |
+| Analysis | `memory-analysis` | Parse .map files or ELF to generate memory usage reports and symbol size rankings |
+| Analysis | `static-analysis` | cppcheck/clang-tidy/GCC analyzer static analysis with MISRA-C compliance |
+| Orchestration | `workflow` | Pipeline orchestration chaining multiple skills (build + flash + monitor/debug) |
+
+## Usage Examples
 
 After installing skills, trigger them with natural language or direct skill commands in your chat.
 
@@ -241,44 +102,17 @@ After installing skills, trigger them with natural language or direct skill comm
 
 ```text
 .
-├── skills/                     # Skill modules
-│   ├── build-cmake/            # CMake build
-│   ├── build-keil/             # Keil build
-│   ├── build-iar/              # IAR build
-│   ├── build-platformio/       # PlatformIO build
-│   ├── flash-keil/             # Keil flash
-│   ├── flash-openocd/          # OpenOCD flash
-│   ├── flash-platformio/       # PlatformIO flash
-│   ├── debug-gdb-openocd/      # GDB debug
-│   ├── debug-platformio/       # PlatformIO debug
-│   ├── serial-monitor/         # Serial monitor
-│   ├── modbus-debug/           # Modbus debug
-│   ├── can-debug/              # CAN bus debug
-│   ├── visa-debug/             # VISA instrument debug
-│   ├── workflow/               # Pipeline orchestration
-│   ├── build-idf/              # ESP-IDF build
-│   ├── flash-idf/              # ESP-IDF flash
-│   ├── flash-jlink/            # J-Link flash
-│   ├── debug-jlink/            # J-Link GDB debug
-│   ├── memory-analysis/        # Firmware memory analysis
-│   ├── rtos-debug/             # RTOS debug
-│   └── static-analysis/        # Static analysis
-├── shared/                     # Shared conventions
-│   ├── contracts.md            # Context handoff contracts
-│   ├── failure-taxonomy.md     # Failure taxonomy
-│   ├── platform-compatibility.md
-│   ├── project_detect.py       # Unified project detection module
-│   └── references/
-├── templates/                  # Skill templates
-│   └── skill-template/
+├── skills/       # 24 skill modules (each with SKILL.md + scripts + references)
+├── shared/       # Shared conventions (contracts / failure-taxonomy / platform-compatibility)
+│                 # and reusable modules (project_detect.py / profile_store.py / tool_config.py)
+├── templates/    # skill-template/ for new skills
 └── scripts/
-    ├── install.py              # Install / uninstall / status check
-    ├── validate_repo.py        # Structure validation
-    └── em_config.py            # Tool path config CLI
+    ├── install.py         # Install / uninstall / status check
+    ├── validate_repo.py   # Repository structure validation
+    └── em_config.py       # Tool path config CLI
 ```
 
 <img width="2955" height="1955" alt="PixPin_2026-04-26_22-31-41" src="https://github.com/user-attachments/assets/e62e3118-929e-494c-8d24-c9dcebec22c3" />
-
 
 ## Shared Conventions
 
@@ -291,19 +125,9 @@ All skills share a common set of core context for input and output:
 
 See [shared/contracts.md](shared/contracts.md) and [shared/failure-taxonomy.md](shared/failure-taxonomy.md).
 
-## Validation
-
-After modifications, run structure validation:
-
-```bash
-python3 scripts/validate_repo.py
-```
-
-The validator checks that all skills have the required files, frontmatter, and section headings.
-
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Use the [templates/skill-template/](templates/skill-template/) template when creating new skills.
+See [CONTRIBUTING.md](CONTRIBUTING.md) (includes skill structure requirements and the pre-commit validation flow). Use the [templates/skill-template/](templates/skill-template/) template when creating new skills.
 
 ## Future Extensions
 
